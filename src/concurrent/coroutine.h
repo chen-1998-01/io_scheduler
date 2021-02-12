@@ -15,12 +15,12 @@
 
 	class schedule;//调度器
 
-	class coroutine :public std::enable_shared_from_this<coroutine> {
+	class coroutine:public std::enable_shared_from_this<coroutine> {
 		friend class schedule;
-	private:
+	protected:
 		coroutine();//默认构造函数用于静态加载
 	public:
-		typedef std::shared_ptr<coroutine>coroutine_ptr;
+		typedef std::shared_ptr<coroutine> coroutine_ptr;
 		coroutine(std::function<void()> func, size_t  stack_size,bool mainfiber);
 		//func 为回调函数，stack_size为开辟的栈的大小，mainfiber用来标记是否采用主协程进行管理
 		~coroutine();

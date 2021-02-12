@@ -24,10 +24,6 @@
 
 	class Mutex {
 		friend class condition_variable;
-	private:
-		Mutex(const Mutex&) = delete;
-		Mutex(const Mutex&&) = delete;
-		Mutex operator=(const Mutex&) = delete;
 	public:
 		Mutex();
 		~Mutex();
@@ -110,6 +106,30 @@
 		void unlock();
 
 	};
+
+	template<class T>
+	locallock<T>::locallock(const T&_mutex) {
+		m_mutex = _mutex;
+		lock();
+		lock_state = true;
+	}
+
+	template<class T>
+	locallock<T>::~locallock() {
+		unlock();
+		lock_state = false;
+	}
+
+	template<class T>
+	void locallock<T>::lock() {
+		m_mutex.lock();
+	}
+
+	template<class T>
+	void locallock<T>::unlock() {
+		m_mutex.unlock();
+	}
+
 
 	template<class T>
 	class localreadlock {

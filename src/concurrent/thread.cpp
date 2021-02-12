@@ -5,6 +5,8 @@
 
 	static thread_local Thread* g_thread = nullptr;
 	static thread_local std::string g_name = "unknown";
+  static  thread_local logger::_logger g_logger=root_logger();
+
 
 	Thread::Thread(std::function<void()>func,const std::string& name) :
 	m_thread(0), m_id(0), m_name("unknow"),m_function(func),m_state(state::init){
@@ -16,6 +18,10 @@
 		m_state=state::ready;
 		int value = pthread_create(&m_thread, NULL, &Thread::run,this);
 		//创建线程，tid_t表示新线程id，attr表示新线程的属性，start_rtn表示执行函数，arg表示执行函数的传递参数
+	  if(value){
+		   logger_error_eventstream(g_logger)<<"thread create failed";
+			 record(g_logger,logger_level::inform);
+		}
 		m_semaphore->wait();//信号量减一
 	}
 
@@ -38,7 +44,8 @@
 	  std::function<void()>func;
 	  func.swap(newthread->m_function);
 		newthread->set_state(state::running);
-		std::cout<<Thread::get_this_threadname()<<",the id:"<<newthread->get_id()<<std::endl;
+		logger_inform_eventstream(g_logger)<<"A thread been created";
+		record(g_logger,logger_level::inform);
 		func();
 	  return 0;
 	}
@@ -64,4 +71,6 @@
     if(m_thread)
 		  pthread_detach(m_thread);
     m_state=state::terminate;
+		logger_inform_eventstream(g_logger)<<"A thread been free";
+		record(g_logger,logger_level::inform);
 	}

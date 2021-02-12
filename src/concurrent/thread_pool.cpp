@@ -11,7 +11,6 @@ m_threadsize(0),m_queuesize(32),m_running(false){
   }
 
   void thread_pool::Start(){
-       std::cout<<"start ..."<<std::endl;
        m_running=true;//切换状态
        m_threads.resize(m_threadsize);
        for(int i=0;i<m_threadsize;i++){
@@ -33,8 +32,7 @@ m_threadsize(0),m_queuesize(32),m_running(false){
         Run();
    }
 
-   void thread_pool::Run(){
-       std::cout<<"in the running state"<<std::endl;  
+   void thread_pool::Run(){  
        while(m_running){  
          std::list<task>task_list;
          m_queue->get_out(task_list);
@@ -54,7 +52,6 @@ m_threadsize(0),m_queuesize(32),m_running(false){
 
    void thread_pool::Stop(){
         m_queue->stop();
-        std::cout<<"begin to stop"<<std::endl;
         m_running=false;
         for(int i=0;i<m_threads.size();i++)
            if(m_threads[i])

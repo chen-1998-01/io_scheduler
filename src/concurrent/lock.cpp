@@ -152,28 +152,6 @@
 		pthread_spin_unlock(&m_mutex);
 	}
 
-	template<class T>
-	locallock<T>::locallock(const T&_mutex) {
-		m_mutex = _mutex;
-		lock();
-		lock_state = true;
-	}
-
-	template<class T>
-	locallock<T>::~locallock() {
-		unlock();
-		lock_state = false;
-	}
-
-	template<class T>
-	void locallock<T>::lock() {
-		m_mutex.lock();
-	}
-
-	template<class T>
-	void locallock<T>::unlock() {
-		m_mutex.unlock();
-	}
 
 	RW_Mutex::RW_Mutex() {
 		int init_value=pthread_rwlock_init(&m_mutex, NULL);
