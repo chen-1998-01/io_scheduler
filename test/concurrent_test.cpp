@@ -1,12 +1,13 @@
+#include"../src/manager/logger.h"
 #include"../src/concurrent/lock.h"
 #include"../src/concurrent/thread.h"
 #include"../src/concurrent/task_queue.h"
 #include"../src/concurrent/thread_pool.h"
-//#include"../src/concurrent/coroutine.h"
-//#include"../src/concurrent/schedule.h"
+#include"../src/concurrent/coroutine.h"
+#include"../src/concurrent/schedule.h"
 #include<thread>
 
-
+static  thread_local logger::_logger g_logger=root_logger();
 Mutex* t_mutex=new Mutex();
 condition_variable* t_condition=new condition_variable(*t_mutex);
 int i=0;
@@ -17,7 +18,8 @@ void consumer(){
   std::string condition="i大于1";
   while(i<1)
     t_condition->wait_conduct(condition);//被阻塞，等待通知  
-  std::cout<<i<<" ";
+  logger_error_eventstream(g_logger)<<"the test result is:"+std::to_string(i);
+	record(g_logger,logger_level::inform);
   t_mutex->unlock();
 }
 
@@ -32,9 +34,9 @@ void conducter(){
 void task(){
    for(int i=0;i<3;i++){
      j++;
-     std::cout<<j<<" ";
+   logger_error_eventstream(g_logger)<<"the test result is:"+std::to_string(j);
+	 record(g_logger,logger_level::inform); 
    }
-   std::cout<<std::endl;
 }
 
 int main(int argc,char* argv[]){
@@ -49,7 +51,6 @@ int main(int argc,char* argv[]){
   for(int j=0;j<t_threads.size();j++)
      t_threads[j]->join();   
   std::cout<<"#lock test#"<<std::endl;
-  std::cout<<std::this_thread::get_id()<<std::endl;
   task_queue<std::function<void()>>* t_queue=new task_queue<std::function<void()>>(9);
   std::vector<std::thread>t_threadlist;
   for(int i=0;i<3;i++){
@@ -64,7 +65,6 @@ int main(int argc,char* argv[]){
   j=0;
   t_threadlist.clear();
   thread_pool* t_pool=new thread_pool;
-  std::cout<<"add task"<<std::endl;
   for(int k=0;k<3;k++){
      using function_type=void(thread_pool::*)(std::function<void()>&&);
      function_type add=&thread_pool::add_task;
@@ -72,7 +72,9 @@ int main(int argc,char* argv[]){
   }
   t_pool->start(3);  
   for(int k=0;k<t_threadlist.size();k++)
-      t_threadlist[k].join();       
+      t_threadlist[k].join();           
   std::cout<<"#thread pool test#"<<std::endl;
+  schedule* t_scheduler=new schedule(3,"scheduler test:",false); 
+  std::cout<<"#scheduler test#"<<std::endl;
   return 0;
 }
