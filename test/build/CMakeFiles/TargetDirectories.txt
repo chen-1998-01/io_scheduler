@@ -1,5 +1,0 @@
-/home/platform/project/inet/server-platform/test/build/CMakeFiles/edit_cache.dir
-/home/platform/project/inet/server-platform/test/build/CMakeFiles/client_test.dir
-/home/platform/project/inet/server-platform/test/build/CMakeFiles/inet_test.dir
-/home/platform/project/inet/server-platform/test/build/CMakeFiles/rebuild_cache.dir
-/home/platform/project/inet/server-platform/test/build/CMakeFiles/io_test.dir
