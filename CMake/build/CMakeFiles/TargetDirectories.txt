@@ -1,0 +1,3 @@
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/rebuild_cache.dir
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/edit_cache.dir
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/io_server.dir

@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/command.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/command.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/io_server.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/io_server.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/coroutine.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/coroutine.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/event.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/event.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/schedule.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/schedule.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/thread.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/thread.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/timer.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/concurrent/timer.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/io/io.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/io/io.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/file.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/file.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/handle.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/handle.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/hook.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/hook.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/logger.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/logger.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/memory_pool.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/memory_pool.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/times.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/manager/times.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/address.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/address.cpp.o.d"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/socket.cpp.o"
+  "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/socket.cpp.o.d"
+  "io_server"
+  "io_server.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/io_server.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

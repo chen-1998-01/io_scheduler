@@ -3,17 +3,56 @@ add_compile_options(
   "-std=c++11"
   "-g"
 )
+
+
 set(
-  SRC_LIST 
-  ./concurrent_test.cpp
-  ../src/concurrent/lock.cpp
-  ../src/concurrent/thread.cpp
-  ../src/concurrent/thread_pool.cpp
-  ../src/manager/memory_pool.cpp
-  ../src/manager/times.cpp
-  ../src/manager/logger.cpp
-  ../src/stream/file_stream.cpp
-  )
-add_executable(concurrent_test ${SRC_LIST})
+  NET_LIST
+  ./inet_test.cpp
+  ../../src/net/address.cpp
+  ../../src/net/socket.cpp
+  ../../src/manager/memory_pool.cpp
+  ../../src/manager/times.cpp
+  ../../src/manager/file.cpp
+  ../../src/manager/logger.cpp
+  ../../src/concurrent/thread.cpp
+  ../../src/concurrent/coroutine.cpp
+  ../../src/concurrent/schedule.cpp
+  ../../src/concurrent/timer.cpp
+  ../../src/concurrent/event.cpp
+  ../../src/manager/handle.cpp
+  ../../src/io/io.cpp
+  ../../src/manager/hook.cpp
+)
+add_executable(inet_test ${NET_LIST})
 find_package(Threads)
-target_link_libraries(concurrent_test ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(inet_test ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(inet_test dl)
+
+set(
+  CLIENT
+  ./client_test.cpp
+  ../../src/net/address.cpp
+  ../../src/net/socket.cpp
+  ../../src/manager/memory_pool.cpp
+  ../../src/manager/times.cpp
+  ../../src/manager/file.cpp
+  ../../src/manager/logger.cpp
+  ../../src/concurrent/thread.cpp
+  ../../src/concurrent/coroutine.cpp
+  ../../src/concurrent/schedule.cpp
+  ../../src/concurrent/timer.cpp
+  ../../src/concurrent/event.cpp
+  ../../src/manager/handle.cpp
+  ../../src/io/io.cpp  
+  ../../src/manager/hook.cpp
+)
+add_executable(client_test ${CLIENT})
+find_package(Threads)
+target_link_libraries(client_test ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(client_test dl)
+
+set(
+  EXECUTABLE_OUTPUT_PATH
+  ${PROJECT_BINARY_DIR}/bin
+)
+

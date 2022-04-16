@@ -1,24 +1,26 @@
-#include"logger.h"
+#include"../../include/logger.h"
+#include"../../include/memory_pool.h"
 
+static memory_manager* m_memory=memory_manager::GetMemoryManger();
 
-
-	logevent::logevent(const std::string& _filename, uint32_t _linenuber,const std::string& _threadname,
-		uint32_t _Threadid, uint32_t _coroutineid, uint32_t _elapse, uint64_t _time,
+logevent::logevent(const std::string& _filename, uint32_t _linenuber,const std::string& _threadname,
+		uint32_t _Threadid, uint32_t _coroutineid,const char*_func,uint32_t _elapse, const std::string& _time,
 		logger_level::level _level,std::shared_ptr<logger>_logger): 
 		m_file_name(""),m_line_number(_linenuber),m_thread_name(""),
-		m_thread_id(0), m_coroutine_id(0),
-		m_elapse_second(0), m_localtime(0),
+		m_thread_id(0), m_coroutine_id(0),m_elapse_second(0), 
 	    m_level(logger_level::debug),m_logger(nullptr){
 		m_file_name = _filename;
 		m_thread_name = _threadname;
 		m_thread_id = _Threadid;
 		m_coroutine_id = _coroutineid;
+		m_func=(char*)malloc(sizeof(32)); 
+		strcpy(m_func,_func);
 		m_elapse_second = _elapse;
 		m_localtime = _time;
 		m_level = _level;
 		m_logger = _logger;
 		m_stream.str("");
-	};
+};
 
 	void logevent::set_filename(const std::string& _filename) {
 		m_file_name = _filename;
@@ -40,18 +42,30 @@
 		m_elapse_second = _second;
 	}
 
-	void logevent::set_time(uint64_t _time) {
+	void logevent::set_time(const std::string& _time) {
 		m_localtime = _time;
 	}
- 
+
+    void logevent::set_level(logger_level::level _level) {
+			m_level = _level;
+		}
 	void logevent::log(){
 		m_logger->log(m_level, shared_from_this());
 	}
 
+
+
+  logevent_wrap* logevent_wrap::m_wrap=nullptr;
+  
+  logevent_wrap* logevent_wrap::GetLogeventWrap(){
+	  if(!m_wrap)
+		m_wrap=new logevent_wrap();
+	  return m_wrap;
+  }//采用锁的双重检验
+
   void logevent_wrap::updata(){
-     std::unique_lock<std::mutex> lock(m_mutex);
      if(!m_localtime)
-       m_localtime=new Time();
+       m_localtime=Time::GetTimeManager();
      if(m_localtime->get_month()!=m_month){
        if(!m_recordings.empty())
          m_recordings.clear();
@@ -73,49 +87,50 @@
 
 std::string logger_level::tostring(logger_level::level _level) {
 		switch (_level){
-#define xx(name)\
-         case  logger_level::name:\
-           return #name;
-			break;
-			xx(debug);
-			xx(warn);
-			xx(inform);
-			xx(crash);
-			xx(error);
-#undef  xx
+		  case 0:{
+			return (std::string)"UNKNOW";
+			break;}
+		  case 1:{
+			return (std::string)"DEBUG";
+			break;}
+		 case 2:{
+			return (std::string)"INFOR";
+			break;}
+		 case 3:{
+			return (std::string)"WARN";
+			break;}
+		 case 4:{
+			return (std::string)"ERROR";
+			break;}
+		 case 5:{
+			return (std::string)"CRASH";
+			break;}				
 		default:
-			return (std::string)"unknow";
+			break;
 		}
+		return (std::string)"unknow";
 	}
 
 
-  logger::logger():
-  m_name(""),m_level(logger_level::level::unknow),m_format(nullptr){
-		m_memory_pool=new class_memory_pool();
-	};
+logger::logger():
+  m_name(""),m_level(logger_level::level::unknow),m_format(nullptr)
+  {};
 
-	logger::logger(const std::string& name,logger_level::level _level,std::string _pattern):
-	    m_name(name),m_level(_level){
+logger::logger(const std::string& name,logger_level::level _level,std::string _pattern):
+	m_name(name),m_level(_level){
       set_format(_pattern);              
 	}
 
-	void logger::set_format(const std::string& _pattern) {
-    if(_pattern.empty()){
-       set_default_format();
-       return;
-    }       
-		logger_format::_format new_format(m_memory_pool->new_class<logger_format>(_pattern));
-		if (new_format == NULL) {
-			std::cout << "create format failed" << std::endl;
-			return;
-		}
-		set_format(new_format);
+void logger::set_format(const std::string& _pattern) {      
+	logger_format::_format new_format(new logger_format(_pattern));
+	if (new_format == NULL) {
+	  std::cout << "create format failed" << std::endl;
+	  return;
 	}
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_format=new_format;
+}
 
-	void logger::set_format(logger_format::_format _format) {
-		std::unique_lock<std::mutex> lock(m_mutex);
-		m_format = _format;
-	}
 	//f m_file_name;
 	//l m_line_number;
 	//N m_thread_name;
@@ -126,18 +141,14 @@ std::string logger_level::tostring(logger_level::level _level) {
 	//T tab
 	//e enter
 
-//设置默认格式
-	void logger::set_default_format() {
-		std::string _pattern = "%T-%f-%l-%N-%t-%c-%s-%C-%e";
-		set_format(_pattern);
-	}
+
 	//{"f", 0}, { "N",1 }, { "t",2 }, { "c",3 }, { "s",4 }, { "C",5 }, { "T",6 }, { "e",7 }, { "L",8 }, { "R",9 }, { "l",10 }, { "E",11 }
 
 
 	void logger::log(logger_level::level _level, logevent::_event _event) {
+		std::unique_lock<std::mutex> lock(m_mutex);
 		if (_level < m_level)
 			return;
-		std::unique_lock<std::mutex> lock(m_mutex);
 		if (m_appender.empty())
 			return;
 		for (auto& i:m_appender) {
@@ -167,19 +178,21 @@ std::string logger_level::tostring(logger_level::level _level) {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		if (m_appender.empty())
 			return;
-			m_appender.clear();
+		m_appender.clear();
 	}
 	
    system_logger::system_logger(const std::string&  _name,logger_level::level _level,std::string _pattern ){
         m_name=_name;
+		m_level=_level;
         set_format(_pattern);
-        logger_appender::_appender newappender(new console_appender());
+        logger_appender::_appender newappender(m_memory->default_new_object<console_appender>());
         add_appender(newappender);
-        }
+    }
     
     system_logger::~system_logger(){
         clean_appender();
     }
+
 
         
     file_logger::file_logger(const std::string& logger_name,logger_level::level _level, const std::string& file_name,std::string _pattern):
@@ -196,36 +209,36 @@ std::string logger_level::tostring(logger_level::level _level) {
           m_filenum=0;
     }
 
+    void logger_appender::set_format(logger_format::_format _format) {
+		std::unique_lock<std::mutex> lock(m_mutex);
+		if (isempty_format)
+			m_format = _format;
+		isempty_format = false;
+	}
 
+   file_appender::file_appender():m_filestream(nullptr){
+    }
 
-  file_appender::file_appender():m_filestream(nullptr){
-    m_files=file::get_instance();
-  }
-
-	file_appender::file_appender(const std::string& _filename) {
+   file_appender::file_appender(const std::string& _filename) {
 		m_level = logger_level::debug;
 		isempty_format = true;
-    if(!m_files)
-      m_files=file::get_instance();
-    m_files->add_file(_filename);  
+        file_manager* m_files=file_manager::GetFileManager();
+        m_files->add_file(_filename);  
 		open(_filename);
-    m_filestream=m_files->get_stream(_filename);
+        m_filestream=m_files->get_stream(_filename);
 	}
 
   file_appender::~file_appender(){
      m_format.reset();
      m_level=logger_level::level::unknow;
      if(m_filestream)
-       m_filestream=nullptr;
-     if(m_files)
-        m_files=nullptr;  
+       m_filestream=nullptr;  
   }
 
 	void file_appender::open(const std::string& _filename) {
 		std::unique_lock<std::mutex> lock(m_mutex);
-		if(!m_files)
-      m_files=file::get_instance();
-    m_files->open_file(_filename);  
+        file_manager* m_files=file_manager::GetFileManager();
+        m_files->open_file(_filename);  
 	}
 
 	void file_appender::log(std::shared_ptr<logger>_logger, logger_level::level _level, logevent::_event _event) {
@@ -236,23 +249,16 @@ std::string logger_level::tostring(logger_level::level _level) {
 			std::cout << "error,log failed" << std::endl;
 	}
 
-	void file_appender::set_format(logger_format::_format _format) {
-		std::unique_lock<std::mutex> lock(m_mutex);
-		if (isempty_format) {
-			m_format = _format;
-			isempty_format = false;
-		}
-	}
 
 	console_appender::console_appender(){
 		m_level = logger_level::debug;
 		isempty_format = true;
 	}
 
-  console_appender::~console_appender(){
-     m_format.reset();
-     m_level=logger_level::level::unknow;
-  }
+    console_appender::~console_appender(){
+        m_format.reset();
+        m_level=logger_level::level::unknow;
+    }
 
 	void console_appender::log(std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event) {
 		std::unique_lock<std::mutex> lock(m_mutex);
@@ -263,13 +269,6 @@ std::string logger_level::tostring(logger_level::level _level) {
 		}
 	}
 
-	void console_appender::set_format(logger_format::_format _format) {
-		std::unique_lock<std::mutex> lock(m_mutex);
-		if (isempty_format)
-			m_format = _format;
-		isempty_format = false;
-	}
-
 
 
 	class filename_item :public logger_format::logger_item {
@@ -278,7 +277,8 @@ std::string logger_level::tostring(logger_level::level _level) {
 		~filename_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
 			std::unique_lock<std::mutex> lock(m_mutex);
-			out << _event->get_filename()<<"     ";
+			out<<"\033[036m";	
+			out << _event->get_filename();
 		}
 	private:
 		std::string m_title;
@@ -290,7 +290,8 @@ std::string logger_level::tostring(logger_level::level _level) {
 		~linenumber_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger, logger_level::level _level, logevent::_event _event)override {
 			std::unique_lock<std::mutex> lock(m_mutex);
-			out << _event->get_linenumber()<<"     ";
+			out<<"\033[036m";
+			out << _event->get_linenumber();
 		}
 	private:
 		std::string m_title;
@@ -301,8 +302,9 @@ std::string logger_level::tostring(logger_level::level _level) {
 		threadname_item(const std::string&_str) { m_title = _str; }
 		~threadname_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
-			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_threadname()<<"     ";
+			std::unique_lock<std::mutex> lock(m_mutex);
+			out<<"\033[034m";	
+			out << _event->get_threadname();
 		}
 	private:
 		std::string m_title;
@@ -314,7 +316,8 @@ std::string logger_level::tostring(logger_level::level _level) {
 		~threadid_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
 			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_threadid()<<"     ";
+			out<<"\033[034m";	
+			out <<"Thread id:"<<"["<< _event->get_threadid()<<"]";
 		}
 	private:
 		std::string m_title;
@@ -325,12 +328,26 @@ std::string logger_level::tostring(logger_level::level _level) {
 		corrouteid_item(const std::string&_str) { m_title = _str; }
 		~corrouteid_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
-			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_coroutineid()<<"    ";
+			std::unique_lock<std::mutex> lock(m_mutex);
+			out<<"\033[034m";	
+			out <<"Corroute id:"<<"["<<_event->get_coroutineid()<<"]";
 		}
 	private:
 		std::string m_title;
 	};//打印协程号
+
+class func_item :public logger_format::logger_item {
+	public:
+		func_item(const std::string&_str) { m_title = _str; }
+		~func_item() {};
+		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
+			std::unique_lock<std::mutex> lock(m_mutex);
+			out<<"\033[036m";	
+			out << "["<<_event->get_func()<<"]";
+		}
+	private:
+		std::string m_title;
+	};//打印线程名称
 
 	class elapse_item :public logger_format::logger_item {
 	public:
@@ -338,7 +355,7 @@ std::string logger_level::tostring(logger_level::level _level) {
 		~elapse_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger, logger_level::level _level, logevent::_event _event)override {
 			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_elapse_second()<<"     ";
+			out << _event->get_elapse_second()<<"s";
 		}
 	private:
 		std::string m_title;
@@ -349,8 +366,9 @@ std::string logger_level::tostring(logger_level::level _level) {
 		time_item(const std::string&_str) { m_title = _str; }
 		~time_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
-			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_localtime()<<"     ";
+			std::unique_lock<std::mutex> lock(m_mutex);
+			out<<"\033[036m";		
+			out << _event->get_localtime();
 		}
 	private:
 		std::string m_title;
@@ -385,8 +403,9 @@ std::string logger_level::tostring(logger_level::level _level) {
 		level_item(const std::string&_str) { m_title = _str; }
 		~level_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event)override {
-			std::unique_lock<std::mutex> lock(m_mutex);	
-			out << _event->get_level();
+			std::unique_lock<std::mutex> lock(m_mutex);
+			out<<"\033[32m";	
+			out <<"        ["<<logger_level::tostring(_event->get_level())<<"]";
 		}
 	private:
 		std::string m_title;
@@ -410,7 +429,8 @@ std::string logger_level::tostring(logger_level::level _level) {
 		~content_item() {};
 		void log(std::ostream& out, std::shared_ptr<logger>_logger, logger_level::level _level, logevent::_event _event)override {
 			std::unique_lock<std::mutex> lock(m_mutex);
-			out << _event->get_content()<<"     ";
+			out<<"\033[037m";
+			out <<"["<< _event->get_content()<<"]";
 		}
 	private:
 		std::string m_title;
@@ -430,14 +450,13 @@ std::string logger_level::tostring(logger_level::level _level) {
 
 
 	logger_format::logger_format(const std::string& _pattern) {
-		m_memory_pool=new class_memory_pool();
 		m_pattern = _pattern;
 		explain();
 	}
 
 	std::ostream& logger_format::log(std::ostream& out,std::shared_ptr<logger>_logger,logger_level::level _level, logevent::_event _event) {
-		std::unique_lock<std::mutex> lock(m_mutex);
 		for (auto& i : m_items) {
+			std::unique_lock<std::mutex> lock(m_mutex);
 			i->log(out,_logger,_level, _event);
 		}
 		return out;
@@ -521,65 +540,73 @@ std::string logger_level::tostring(logger_level::level _level) {
 		}//while外部循环结束
 
 		std::map<char, int>maps = {
-			{'f',0},{'N',1},{'t',2 }, { 'c',3 }, { 's',4 },{'C',5},{'T',6},{'e',7},{'L',8},{'R',9} ,{'l',10},{'S',11}, {'E',12}
-
+			{'f',0},{'N',1},{'t',2 }, { 'c',3 }, { 's',4 },{'C',5},{'T',6},{'e',7},{'L',8},{'R',9} ,{'l',10},{'S',11}, {'F',12}
 		};
 		for (auto& i : vectors) {
 			if (std::get<2>(i) == 0) {
 				auto _value = maps.find(std::get<0>(i));
 				if (_value == maps.end()) {
-					m_items.push_back(logger_format::logger_item::_item(m_memory_pool->new_class<error_item>((const std::string)"cmd unlegal!")));
+					m_items.push_back(logger_format::logger_item::_item(m_memory->new_object<error_item>((const std::string)"cmd unlegal!")));
 				}
 				else {
 					int _order = _value->second;
 					switch (_order) {
 					case 0: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<filename_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<filename_item>((const std::string)"")));
 						break;}
 					case 1: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<threadname_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<threadname_item>((const std::string)"")));
 						break;}
 					case 2: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<threadid_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<threadid_item>((const std::string)"")));
 						break;}
 					case 3: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<corrouteid_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<corrouteid_item>((const std::string)"")));
 						break;}
 					case 4: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<elapse_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<elapse_item>((const std::string)"")));
 						break;}
 					case 5: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<time_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<time_item>((const std::string)"")));
 						break;}
 					case 6: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<tab_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<tab_item>((const std::string)"")));
 						break;}
 					case 7: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<newline_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<newline_item>((const std::string)"")));
 						break;}
 					case 8: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<level_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<level_item>((const std::string)"")));
 						break; }
 					case 9: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<Logger_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<Logger_item>((const std::string)"")));
 						break; }
 					case 10: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<linenumber_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<linenumber_item>((const std::string)"")));
 						break; }
 					case 11: {
-						m_items.push_back(logger_item::_item(m_memory_pool->new_class<content_item>((const std::string)"")));
+						m_items.push_back(logger_item::_item(m_memory->new_object<content_item>((const std::string)"")));
 						break; }
+					case 12: {
+						m_items.push_back(logger_item::_item(m_memory->new_object<func_item>((const std::string)"")));
+						break; }	
 				    }
 			    }
 		    }
 			else if (std::get<2>(i) == -1) {
-				m_items.push_back(logger_item::_item(m_memory_pool->new_class<error_item>("unknow")));}
+				m_items.push_back(logger_item::_item(m_memory->new_object<error_item>("unknow")));}
 		}
 }
 
 
+   logger_manager* logger_manager::m_logger_manager=nullptr;
+   logger_manager* logger_manager::GetLoggerManager(){
+	   if(!m_logger_manager)
+	      m_logger_manager=new logger_manager();
+	   return m_logger_manager;   
+   } 
 
-	logger_manager::logger_manager():m_number(0){
+	logger_manager::logger_manager(){
 		load_root_logger();
 	}
 
@@ -589,10 +616,8 @@ std::string logger_level::tostring(logger_level::level _level) {
 	}
 	
 	void logger_manager::load_root_logger() {
-	  std::unique_lock<std::mutex> lock(m_mutex);
-		m_root_logger= logger::_logger(new system_logger("#system",logger_level::level::debug));
+		m_root_logger.reset(new system_logger("#system",logger_level::debug));
 		m_loggers.insert(std::pair<std::string, logger::_logger>("#system",m_root_logger));
-		m_number++;
 	}
 
 
@@ -601,20 +626,16 @@ std::string logger_level::tostring(logger_level::level _level) {
 	    auto iter=m_loggers.find(name);
 	    if (iter != m_loggers.end()) {
 		    m_loggers.erase(iter);
-		    m_number--;
 	      }
 	}
 	
 	void logger_manager::clean_logger() {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		m_loggers.clear();
-		m_number = 0;
 	}
 	
 	logger::_logger logger_manager::get_logger(const std::string& name) {
 		std::unique_lock<std::mutex> lock(m_mutex);
-		if (m_number == 0)
-			return nullptr;
 		auto iter=m_loggers.find(name);
 		if (iter != m_loggers.end())
 			return iter->second;
@@ -624,7 +645,5 @@ std::string logger_level::tostring(logger_level::level _level) {
   logger_manager::~logger_manager(){
      m_loggers.clear();
      m_root_logger.reset();
-     m_number=0;
-
   }  
 
