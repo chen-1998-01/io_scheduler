@@ -4,6 +4,9 @@ add_compile_options(
   "-g"
 )
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(
   SERVER_LIST
@@ -28,3 +31,6 @@ add_executable(io_server ${SERVER_LIST})
 find_package(Threads)
 target_link_libraries(io_server ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(io_server dl)
+
+set(CMAKE_INSTALL_PREFIX /usr/local)
+install(TARGETS io_server DESTINATION bin)

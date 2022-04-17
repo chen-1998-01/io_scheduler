@@ -2,14 +2,26 @@ CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/io_
  /home/platform/project/inet/server-platform/src/boot/io_server.cpp \
  /usr/include/stdc-predef.h \
  /home/platform/project/inet/server-platform/src/boot/../../include/command.h \
- /usr/include/c++/9/string \
- /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
- /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
- /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/unistd.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/bits/long-double.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/c++/9/string \
+ /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
+ /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/cpu_defines.h \
  /usr/include/c++/9/bits/stringfwd.h /usr/include/c++/9/bits/memoryfwd.h \
  /usr/include/c++/9/bits/char_traits.h \
@@ -32,7 +44,6 @@ CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/io_
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
- /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
@@ -44,10 +55,6 @@ CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/boot/io_
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/c++/9/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/types.h \
- /usr/include/x86_64-linux-gnu/bits/timesize.h \
- /usr/include/x86_64-linux-gnu/bits/typesizes.h \
- /usr/include/x86_64-linux-gnu/bits/time64.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/c++/9/bits/allocator.h \

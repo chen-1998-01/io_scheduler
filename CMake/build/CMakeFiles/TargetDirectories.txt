@@ -1,3 +1,7 @@
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/install/strip.dir
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/install/local.dir
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/install.dir
+/home/platform/project/inet/server-platform/CMake/build/CMakeFiles/list_install_components.dir
 /home/platform/project/inet/server-platform/CMake/build/CMakeFiles/rebuild_cache.dir
 /home/platform/project/inet/server-platform/CMake/build/CMakeFiles/edit_cache.dir
 /home/platform/project/inet/server-platform/CMake/build/CMakeFiles/io_server.dir

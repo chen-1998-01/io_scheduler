@@ -31,8 +31,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/address.cpp.o.d"
   "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/socket.cpp.o"
   "CMakeFiles/io_server.dir/home/platform/project/inet/server-platform/src/net/socket.cpp.o.d"
-  "io_server"
-  "io_server.pdb"
+  "bin/io_server"
+  "bin/io_server.pdb"
 )
 
 # Per-language clean rules from dependency scanning.
